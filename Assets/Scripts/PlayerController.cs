@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;
+
     public Rigidbody2D theRB;
 
     public float moveSpeed = 5f;
@@ -15,6 +17,15 @@ public class PlayerController : MonoBehaviour
 
     public Camera viewCam;
 
+    public GameObject bulletImpact;
+    public int currentAmmo;
+
+    public Animator gunAnim;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -41,6 +52,27 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z - mouseInput.x);
 
         viewCam.transform.localRotation = Quaternion.Euler(viewCam.transform.localRotation.eulerAngles + new Vector3(0f, mouseInput.y, 0f));
+
+        //shooting
+        if(Input.GetMouseButtonDown(0))
+        {
+            if (currentAmmo > 0)
+            {
+                Ray ray = viewCam.ViewportPointToRay(new Vector3(.5f, .5f, 0f));
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit))
+                {
+                    //Debug.Log("I;m looking at " + hit.transform.name);
+                    Instantiate(bulletImpact, hit.point, transform.rotation);
+                }
+                else
+                {
+                    Debug.Log("I'm looking at nothing");
+                }
+                currentAmmo--;
+                gunAnim.SetTrigger("Shoot");
+            }
+        }
 
     }
 }
